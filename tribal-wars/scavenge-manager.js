@@ -1,14 +1,15 @@
-/* Scavenge Manager v1.3 — manual fill only */
+/* Scavenge Manager v1.3.1 — manual fill only */
 (function () {
 "use strict";
 try {
-  var screen = new URLSearchParams(window.location.search).get("screen");
-  if (screen !== "scavenge") {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get("screen") !== "place" || params.get("mode") !== "scavenge") {
     var url = new URL("/game.php", window.location.origin);
     var villageId = window.game_data && game_data.village && game_data.village.id;
     if (!villageId) villageId = new URLSearchParams(window.location.search).get("village");
     if (villageId) url.searchParams.set("village", villageId);
-    url.searchParams.set("screen", "scavenge");
+    url.searchParams.set("screen", "place");
+    url.searchParams.set("mode", "scavenge");
     window.location.assign(url.toString());
     return;
   }
