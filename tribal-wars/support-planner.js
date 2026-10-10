@@ -24,7 +24,7 @@
     var panel = d.createElement("div");
     panel.id = "sp";
     panel.style = "position:fixed;right:10px;top:50px;z-index:2147483647;background:#f1e5c7;color:#222;border:3px solid #654;padding:12px;width:440px;max-width:90vw;max-height:85vh;overflow:auto;font:13px Arial";
-    panel.innerHTML = "<b>Support Planner v1.7</b> <button id='spx'>✕</button><p>Ціль: " + target.join("|") + " | Звідки: " + source.join("|") + "</p><p>Прибуття: <input id='spt' type='datetime-local' step='1'></p><div id='spu'></div><p><button id='spc'>Розрахувати</button></p><div id='spr'></div><small>Швидкості орієнтовні. Відправлення лише вручну.</small>";
+    panel.innerHTML = "<b>Support Planner v1.7.1</b> <button id='spx'>✕</button><p>Ціль: " + target.join("|") + " | Звідки: " + source.join("|") + "</p><p>Прибуття: <input id='spt' type='datetime-local' step='1'></p><div id='spu'></div><p><button id='spc'>Розрахувати</button></p><div id='spr'></div><small>Швидкості орієнтовні. Відправлення лише вручну.</small>";
     d.body.appendChild(panel);
     function q(selector) { return panel.querySelector(selector); }
     function pad(number) { return String(number).padStart(2, "0"); }
@@ -32,11 +32,12 @@
     q("#spx").onclick = function () { stopTimer(); panel.remove(); };
     var now = new Date(Date.now() + 3600000);
     q("#spt").value = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + "T" + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+    q("#spu").style = "display:flex;flex-wrap:nowrap;align-items:center;gap:1px;overflow-x:auto;";
     units.forEach(function (unit) {
       var label = d.createElement("label");
-      label.style = "display:inline-flex;align-items:center;border:1px solid #ba9;padding:3px;margin:2px";
+      label.style = "display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;border:1px solid #ba9;padding:1px;margin:1px";
       label.title = unit[0];
-      label.innerHTML = "<input type='checkbox' value='" + unit[0] + "' " + (["spear","sword","heavy"].includes(unit[0]) ? "checked" : "") + "><img width='24' src='/graphic/unit/unit_" + unit[0] + ".png'>";
+      label.innerHTML = "<input style='margin:0 1px 0 0;width:12px;height:12px;flex:none' type='checkbox' value='" + unit[0] + "' " + (["spear","sword","heavy"].includes(unit[0]) ? "checked" : "") + "><img width='17' height='17' src='/graphic/unit/unit_" + unit[0] + ".png'>";
       q("#spu").appendChild(label);
     });
     q("#spc").onclick = function () {
