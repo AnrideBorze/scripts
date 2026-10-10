@@ -23,13 +23,36 @@
     var units = [["snob",35],["ram",30],["catapult",30],["sword",22],["spear",18],["axe",18],["archer",18],["heavy",11],["light",10],["marcher",10],["knight",10],["spy",9]];
     var panel = d.createElement("div");
     panel.id = "sp";
-    panel.style = "position:fixed;right:10px;top:50px;z-index:2147483647;background:#f1e5c7;color:#222;border:3px solid #654;padding:12px;width:440px;max-width:90vw;max-height:85vh;overflow:auto;font:13px Arial";
-    panel.innerHTML = "<b>Support Planner v1.7.1</b> <button id='spx'>✕</button><p>Ціль: " + target.join("|") + " | Звідки: " + source.join("|") + "</p><p>Прибуття: <input id='spt' type='datetime-local' step='1'></p><div id='spu'></div><p><button id='spc'>Розрахувати</button></p><div id='spr'></div><small>Швидкості орієнтовні. Відправлення лише вручну.</small>";
+    panel.style = "position:fixed;right:10px;top:50px;z-index:2147483647;background:#f1e5c7;color:#222;border:3px solid #654;padding:12px;width:440px;max-width:90vw;max-height:85vh;min-width:280px;min-height:170px;resize:both;overflow:auto;box-sizing:border-box;font:13px Arial";
+    panel.innerHTML = "<div id='spdrag' style='display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none;touch-action:none;background:#d7c49c;padding:5px;margin:-5px -5px 8px -5px'><b>Support Planner v1.8 ↕</b><button id='spx' style='cursor:pointer'>✕</button></div><p>Ціль: " + target.join("|") + " | Звідки: " + source.join("|") + "</p><p>Прибуття: <input id='spt' type='datetime-local' step='1'></p><div id='spu'></div><p><button id='spc'>Розрахувати</button></p><div id='spr'></div><small>Швидкості орієнтовні. Відправлення лише вручну.</small>";
     d.body.appendChild(panel);
     function q(selector) { return panel.querySelector(selector); }
     function pad(number) { return String(number).padStart(2, "0"); }
     function stopTimer() { if (window.spTimer) { clearInterval(window.spTimer); window.spTimer = null; } }
     q("#spx").onclick = function () { stopTimer(); panel.remove(); };
+    var dragBar = q("#spdrag");
+    dragBar.addEventListener("pointerdown", function (event) {
+      if (event.button !== 0 || event.target.closest("button")) return;
+      event.preventDefault();
+      var rect = panel.getBoundingClientRect();
+      var offsetX = event.clientX - rect.left, offsetY = event.clientY - rect.top;
+      panel.style.left = rect.left + "px";
+      panel.style.top = rect.top + "px";
+      panel.style.right = "auto";
+      function move(e) {
+        panel.style.left = Math.max(0, Math.min(window.innerWidth - 40, e.clientX - offsetX)) + "px";
+        panel.style.top = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - offsetY)) + "px";
+      }
+      function end() {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", end);
+        window.removeEventListener("pointercancel", end);
+      }
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end);
+      window.addEventListener("pointercancel", end);
+    });
+
     var now = new Date(Date.now() + 3600000);
     q("#spt").value = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate()) + "T" + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
     q("#spu").style = "display:flex;flex-wrap:nowrap;align-items:center;gap:1px;overflow-x:auto;";
