@@ -1,4 +1,4 @@
-/* Scavenge Manager v1.3.1 — manual fill only */
+/* Scavenge Manager v1.4 — manual fill only */
 (function () {
 "use strict";
 try {
@@ -19,6 +19,7 @@ try {
 
   var old = document.getElementById("sm-box");
   if (old) old.remove();
+  if (window.smEnterHandler) document.removeEventListener("keydown", window.smEnterHandler);
 
   var units = s.village.unit_counts_home;
   var stats = s.loot_calculator.default_unit_stats;
@@ -35,7 +36,7 @@ try {
   box.id = "sm-box";
   box.style = "position:fixed;z-index:2147483647;top:5%;left:50%;transform:translateX(-50%);width:600px;max-width:92%;max-height:85%;overflow:auto;background:#f1e5c7;color:#222;border:3px solid #654;padding:15px;font:14px Arial";
   box.innerHTML =
-    "<h2>Scavenge Manager v1.3</h2>" +
+    "<h2>Scavenge Manager v1.4</h2>" +
     "<p>Максимум хвилин: <input id='sm-time' type='number' value='120' min='31' style='width:75px'></p>" +
     "<div id='sm-units'></div>" +
     "<p><button id='sm-calc'>Розрахувати</button> <button id='sm-close'>Закрити</button></p>" +
@@ -55,7 +56,34 @@ try {
     area.appendChild(label);
   });
 
-  box.querySelector("#sm-close").onclick = function() { box.remove(); };
+  function closeBox() {
+    document.removeEventListener("keydown", window.smEnterHandler);
+    window.smEnterHandler = null;
+    box.remove();
+  }
+  box.querySelector("#sm-close").onclick = closeBox;
+
+  window.smEnterHandler = function(event) {
+    if (event.key !== "Enter" || event.repeat || !box.isConnected) return;
+    if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    var tag = event.target && event.target.tagName;
+    if (tag === "TEXTAREA" || (event.target && event.target.isContentEditable)) return;
+    if (tag === "INPUT" && event.target.type !== "number") return;
+    event.preventDefault();
+    event.stopPropagation();
+    var result = box.querySelector("#sm-result");
+    var first = Array.from(result.querySelectorAll("button")).find(function(btn) {
+      return !btn.disabled && btn.textContent === "Заповнити";
+    });
+    if (!first) {
+      box.querySelector("#sm-calc").click();
+      first = Array.from(result.querySelectorAll("button")).find(function(btn) {
+        return !btn.disabled && btn.textContent === "Заповнити";
+      });
+    }
+    if (first) first.click();
+  };
+  document.addEventListener("keydown", window.smEnterHandler, true);
 
   function fill(group) {
     var inputs = document.querySelectorAll(".unitsInput");
@@ -68,7 +96,7 @@ try {
       el.dispatchEvent(new Event("input", {bubbles:true}));
       el.dispatchEvent(new Event("change", {bubbles:true}));
     });
-    box.remove();
+    closeBox();
   }
 
   box.querySelector("#sm-calc").onclick = function() {
